@@ -1,4 +1,4 @@
-import { ChatAlibabaTongyi } from '@langchain/community/chat_models/alibaba_tongyi'
+import 'dotenv/config'
 import { AlibabaTongyiEmbeddings } from '@langchain/community/embeddings/alibaba_tongyi'
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai'
 

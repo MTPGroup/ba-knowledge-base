@@ -1,6 +1,6 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts'
-import { embeddings, llm } from '../services/llm_service'
-import { milvusService } from '../services/milvus_service'
+import { embeddings, llm } from '../services/llm-service'
+import { milvusService } from '../services/milvus-service'
 import { AgentState } from './state'
 
 /// 节点: 检索知识

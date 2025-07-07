@@ -2,10 +2,20 @@ import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { Hono } from 'hono'
 import { IMessage } from '../interface/message'
 import { characterGraph } from '../graph/builder'
+import { auth } from '../lib/auth'
 
 export const chat = new Hono()
 
 chat.post('/', async (c) => {
+  const session = await auth.api.getSession({
+    headers: c.req.raw.headers,
+  })
+  console.log('Session:', session)
+
+  if (!session) {
+    return c.json({ error: '未授权的访问' }, 401)
+  }
+
   const { characterName, question, history } = await c.req.json()
 
   if (!characterName || !question) {
