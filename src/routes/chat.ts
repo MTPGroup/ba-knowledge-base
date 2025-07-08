@@ -3,7 +3,7 @@ import { Variables } from '@/lib/auth'
 import { db } from '@/lib/database'
 import { chat as ct, user } from '~/db/index'
 import { message } from '@/routes/chat/message'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 
 export const chat = new Hono<{
   Variables: Variables
@@ -64,6 +64,21 @@ chat.delete('/delete/:chatId', async (c) => {
     if (result.rowCount === 0) {
       return c.json({ error: '聊天会话不存在或无权删除' }, 404)
     }
+
+    // 清空checkpointer
+    await db.transaction(async (tx) => {
+      // 使用 sql 模板标签可以防止 SQL 注入
+      // 并发执行所有删除语句
+      await Promise.all([
+        tx.execute(sql`DELETE FROM checkpoints WHERE thread_id = ${chatId}`),
+        tx.execute(
+          sql`DELETE FROM checkpoint_writes WHERE thread_id = ${chatId}`,
+        ),
+        tx.execute(
+          sql`DELETE FROM checkpoint_blobs WHERE thread_id = ${chatId}`,
+        ),
+      ])
+    })
 
     return c.json({ message: '聊天会话已删除' }, 200)
   } catch (error) {
