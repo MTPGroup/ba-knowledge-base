@@ -2,11 +2,10 @@ import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { bearer, emailOTP, openAPI, username } from 'better-auth/plugins'
 import { db } from './database'
-import { emailService } from '../services/email-service'
-import * as schema from '../db/better-auth-schema'
+import { emailService } from '@/services/email-service'
+import * as schema from '~/db'
 
 export const auth = betterAuth({
-  trustedOrigins: ['http://localhost:3001', 'https://api.shirabe.cn'],
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema,
@@ -21,11 +20,11 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url }) => {
-      await emailService.sendEmail({
-        to: user.email,
-        subject: '重置密码',
-        html: `<p>请点击以下链接重置您的密码：<a href="${url}">${url}</a></p>`,
-      })
+      // await emailService.sendEmail({
+      //   to: user.email,
+      //   subject: '重置密码',
+      //   html: `<p>请点击以下链接重置您的密码：<a href="${url}">${url}</a></p>`,
+      // })
     },
   },
   emailVerification: {
@@ -68,3 +67,10 @@ export const auth = betterAuth({
     }),
   ],
 })
+
+export type BetterAuthSession = typeof auth.$Infer.Session
+export type BetterAuthUser = typeof auth.$Infer.Session.user
+
+export type Variables = {
+  session: BetterAuthSession
+}

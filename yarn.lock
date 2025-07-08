@@ -906,6 +906,13 @@
     "@google/generative-ai" "^0.24.0"
     uuid "^11.1.0"
 
+"@langchain/langgraph-checkpoint-postgres@^0.0.5":
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/@langchain/langgraph-checkpoint-postgres/-/langgraph-checkpoint-postgres-0.0.5.tgz#e43b4fda81b4b9216f55df5f0fc3c4f71bbd78df"
+  integrity sha512-e98JdEybEVl9ZiL4BckMz6TlStRnXtmFjoDZWVs+EKuQjqk+6r/Kn1S08D1+NLslXbLPPKX/mk+rRS/eHE3Bdw==
+  dependencies:
+    pg "^8.12.0"
+
 "@langchain/langgraph-checkpoint@~0.0.18":
   version "0.0.18"
   resolved "https://registry.yarnpkg.com/@langchain/langgraph-checkpoint/-/langgraph-checkpoint-0.0.18.tgz#2f7a9cdeda948ccc8d312ba9463810709d71d0b8"
@@ -2499,7 +2506,7 @@ pg-types@2.2.0, pg-types@^2.2.0:
     postgres-date "~1.0.4"
     postgres-interval "^1.1.0"
 
-pg@^8.16.3:
+pg@^8.12.0, pg@^8.16.3:
   version "8.16.3"
   resolved "https://registry.yarnpkg.com/pg/-/pg-8.16.3.tgz#160741d0b44fdf64680e45374b06d632e86c99fd"
   integrity sha512-enxc1h0jA/aq5oSDMvqyW3q89ra6XIIDZgCX9vkMrnz5DFTw/Ny3Li2lFQ+pt3L6MCgm/5o2o8HW9hiJji+xvw==

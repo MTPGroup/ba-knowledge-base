@@ -1,11 +1,11 @@
 import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
 import { BaseMessage } from '@langchain/core/messages'
 import { generateNode, reflectNode, retrieveNode } from './node'
+import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres'
 
 const agentState = Annotation.Root({
   characterName: Annotation<string>(),
-  question: Annotation<string>(),
-  chatHistory: Annotation<BaseMessage[]>({
+  messages: Annotation<BaseMessage[]>({
     reducer: (x, y) => x.concat(y),
     default: () => [],
   }),
@@ -16,18 +16,16 @@ const agentState = Annotation.Root({
 
 // 将定义传递给 StateGraph 构造函数
 const workflow = new StateGraph(agentState)
+  .addNode('retrieve', retrieveNode)
+  .addNode('reflect', reflectNode)
+  .addNode('generate', generateNode)
+  .addEdge(START, 'retrieve')
+  .addEdge('retrieve', 'reflect')
+  .addEdge('reflect', 'generate')
+  .addEdge('generate', END)
 
-workflow.addNode('retrieve', retrieveNode)
-workflow.addNode('reflect', reflectNode)
-workflow.addNode('generate', generateNode)
+export const checkpointer = PostgresSaver.fromConnString(
+  process.env.DATABASE_URL!,
+)
 
-// @ts-ignore
-workflow.addEdge(START, 'retrieve')
-// @ts-ignore
-workflow.addEdge('retrieve', 'reflect')
-// @ts-ignore
-workflow.addEdge('reflect', 'generate')
-// @ts-ignore
-workflow.addEdge('generate', END)
-
-export const characterGraph = workflow.compile()
+export const characterGraph = workflow.compile({ checkpointer })

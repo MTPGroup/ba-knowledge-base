@@ -1,4 +1,7 @@
-import { ChatPromptTemplate } from '@langchain/core/prompts'
+import {
+  ChatPromptTemplate,
+  MessagesPlaceholder,
+} from '@langchain/core/prompts'
 import { embeddings, llm } from '../services/llm-service'
 import { milvusService } from '../services/milvus-service'
 import { AgentState } from './state'
@@ -8,8 +11,9 @@ export const retrieveNode = async (
   state: AgentState,
 ): Promise<Partial<AgentState>> => {
   console.log('--- 节点: 检索知识 ---')
-  const { question, characterName } = state
+  const { messages, characterName } = state
 
+  const question = messages[messages.length - 1].content as string
   const queryVector = await embeddings.embedQuery(question)
   console.log('==========================')
   console.log(`用户问题: ${question}`)
@@ -26,7 +30,11 @@ export const reflectNode = async (
   state: AgentState,
 ): Promise<Partial<AgentState>> => {
   console.log('--- 节点: 反思问题 ---')
-  const { characterName, question, context, chatHistory } = state
+  console.log('Current state:', JSON.stringify(state, null, 2))
+  const { characterName, messages, context } = state
+
+  const question = messages[messages.length - 1].content as string
+  const chatHistory = messages.slice(0, -1)
 
   const reflectionPrompt = ChatPromptTemplate.fromMessages([
     [
@@ -58,7 +66,10 @@ export async function generateNode(
   state: AgentState,
 ): Promise<Partial<AgentState>> {
   console.log('--- 节点: 生成最终回复 ---')
-  const { characterName, question, context, reflection, chatHistory } = state
+  const { characterName, messages, context, reflection } = state
+
+  const question = messages[messages.length - 1].content as string
+  const chatHistory = messages.slice(0, -1)
 
   const generationPrompt = ChatPromptTemplate.fromMessages([
     [

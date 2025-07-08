@@ -1,10 +1,14 @@
 import 'dotenv/config'
 import { Hono } from 'hono'
 import { serve } from '@hono/node-server'
-import { chat } from './routes/chats'
+import { chat } from '@/routes/chat'
 import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
-import { auth } from './lib/auth'
+import { auth } from '@/lib/auth'
+import { character } from '@/routes/character'
+import { betterAuth } from '@/middlewares/auth'
+import { contact } from './routes/contact'
+import { checkpointer } from './graph/builder'
 
 const app = new Hono()
 
@@ -20,31 +24,19 @@ app.use(
     credentials: true,
   }),
 )
-app.use('*', async (c, next) => {
-  const session = await auth.api.getSession({ headers: c.req.raw.headers })
+app.use('*', betterAuth)
 
-  if (!session) {
-    // @ts-ignore
-    c.set('user', null)
-    // @ts-ignore
-    c.set('session', null)
-    return next()
-  }
-
-  // @ts-ignore
-  c.set('user', session.user)
-  // @ts-ignore
-  c.set('session', session.session)
-  return next()
-})
-
-app.on(['POST', 'GET'], '/api/auth/**', (c) => auth.handler(c.req.raw))
+app.on(['POST', 'GET'], '/api/auth/*', (c) => auth.handler(c.req.raw))
 
 app.get('/', (c) => {
   return c.text('Hello, welcome to the AI Character Chat API!')
 })
 
 app.route('/api/chat', chat)
+app.route('/api/character', character)
+app.route('/api/contact', contact)
+
+checkpointer.setup()
 
 serve({
   fetch: app.fetch,
