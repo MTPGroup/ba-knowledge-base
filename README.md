@@ -58,12 +58,18 @@
 要运行导入脚本，请使用以下命令：
 
 ```bash
-yarn db:ingest
+yarn milvus:ingest
 ```
 
 这个过程可能需要一些时间，具体取决于您的知识库的大小。
 
-### 2. 启动应用程序
+### 2. 创建/迁移数据库
+
+```bash
+yarn pg:mirgate
+```
+
+### 3. 启动应用程序
 
 数据库填充完毕后，您可以启动聊天应用程序：
 
@@ -72,47 +78,6 @@ yarn dev
 ```
 
 默认情况下，服务器将在 `http://localhost:3001` 上启动。
-
-### 3. 与角色聊天
-
-您可以通过向 `/chat` 端点发送 `POST` 请求来与聊天 API 进行交互。
-
-**端点:** `POST /chat`
-
-**请求体 (JSON):**
-
-```json
-{
-  "characterName": "星野",
-  "question": "你的爱好是什么？",
-  "history": [
-    {
-      "id": "msg1",
-      "role": "user",
-      "content": "你好！",
-      "timestamp": "2025-07-07T12:00:00.000Z"
-    },
-    {
-      "id": "msg2",
-      "role": "assistant",
-      "content": "唔~……老师，你好啊~ *打了个哈欠，揉了揉眼睛*\n\n今天的天气真好啊……感觉睡午觉会很舒服呢……",
-      "timestamp": "2025-07-07T12:00:05.000Z"
-    }
-  ]
-}
-```
-
-- `characterName` (string, 必需): 您想与之交谈的角色的名称。这必须与您知识库中的 `character_name` 字段匹配。
-- `question` (string, 必需): 用户的消息或问题。
-- `history` (IMessage 数组, 可选): 对话历史。每条消息都应有 `id`、`role`（'user' 或 'assistant'）、`content` 和 `timestamp`。
-
-**响应示例 (JSON):**
-
-```json
-{
-  "response": "唔~……我的爱好啊……\n\n那当然是睡午觉啦~ *伸了个懒腰* 还有就是……摸摸鱼什么的~\n\n这两个可是大叔我人生中最棒的享受了哦~ 能让人放松下来，什么都不用想，最舒服了~ 老师呢？有什么特别的爱好吗？"
-}
-```
 
 ## 贡献
 
