@@ -16,16 +16,28 @@ chat.route('/:chatId/message', message)
 chat.post('/create', async (c) => {
   const { characterId, title, avatarUrl, description } = await c.req.json()
   if (!characterId || !title) {
-    return c.json({ error: '角色ID和标题不能为空' }, 400)
+    return c.json(
+      {
+        success: false,
+        error: '角色ID和标题不能为空',
+      },
+      400,
+    )
   }
 
   const session = c.get('session')
   if (!session) {
-    return c.json({ error: '未授权的访问' }, 401)
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
   }
 
   try {
-    const newChat = await db
+    await db
       .insert(ct)
       .values({
         creatorId: session.user.id,
@@ -37,10 +49,22 @@ chat.post('/create', async (c) => {
       })
       .returning()
 
-    return c.json(newChat[0], 201)
+    return c.json(
+      {
+        success: true,
+        message: '聊天会话创建成功',
+      },
+      201,
+    )
   } catch (error) {
     console.error('创建聊天会话时出错:', error)
-    return c.json({ error: '创建聊天会话时出错' }, 500)
+    return c.json(
+      {
+        success: false,
+        error: '创建聊天会话时出错',
+      },
+      500,
+    )
   }
 })
 
@@ -48,12 +72,24 @@ chat.post('/create', async (c) => {
 chat.delete('/delete/:chatId', async (c) => {
   const session = c.get('session')
   if (!session) {
-    return c.json({ error: '未授权的访问' }, 401)
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
   }
 
   const chatId = c.req.param('chatId')
   if (!chatId) {
-    return c.json({ error: '聊天会话ID不能为空' }, 400)
+    return c.json(
+      {
+        success: false,
+        error: '聊天会话ID不能为空',
+      },
+      400,
+    )
   }
 
   try {
@@ -62,13 +98,17 @@ chat.delete('/delete/:chatId', async (c) => {
       .where(and(eq(ct.id, chatId), eq(ct.creatorId, session.user.id)))
 
     if (result.rowCount === 0) {
-      return c.json({ error: '聊天会话不存在或无权删除' }, 404)
+      return c.json(
+        {
+          success: false,
+          error: '聊天会话不存在或无权删除',
+        },
+        404,
+      )
     }
 
     // 清空checkpointer
     await db.transaction(async (tx) => {
-      // 使用 sql 模板标签可以防止 SQL 注入
-      // 并发执行所有删除语句
       await Promise.all([
         tx.execute(sql`DELETE FROM checkpoints WHERE thread_id = ${chatId}`),
         tx.execute(
@@ -80,10 +120,22 @@ chat.delete('/delete/:chatId', async (c) => {
       ])
     })
 
-    return c.json({ message: '聊天会话已删除' }, 200)
+    return c.json(
+      {
+        success: true,
+        message: '聊天会话已删除',
+      },
+      200,
+    )
   } catch (error) {
     console.error('删除聊天会话时出错:', error)
-    return c.json({ error: '删除聊天会话时出错' }, 500)
+    return c.json(
+      {
+        success: false,
+        error: '删除聊天会话时出错',
+      },
+      500,
+    )
   }
 })
 
@@ -91,7 +143,13 @@ chat.delete('/delete/:chatId', async (c) => {
 chat.get('/list', async (c) => {
   const session = c.get('session')
   if (!session) {
-    return c.json({ error: '未授权的访问' }, 401)
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
   }
 
   try {
@@ -103,13 +161,35 @@ chat.get('/list', async (c) => {
     })
 
     if (!userWithChats) {
-      return c.json([], 200)
+      return c.json(
+        {
+          success: true,
+          data: {
+            chats: [],
+          },
+        },
+        200,
+      )
     }
 
-    return c.json(userWithChats.chats, 200)
+    return c.json(
+      {
+        success: true,
+        data: {
+          chats: userWithChats.chats,
+        },
+      },
+      200,
+    )
   } catch (error) {
     console.error('获取聊天会话列表时出错:', error)
-    return c.json({ error: '获取聊天会话列表时出错' }, 500)
+    return c.json(
+      {
+        success: false,
+        error: '获取聊天会话列表时出错',
+      },
+      500,
+    )
   }
 })
 
@@ -117,17 +197,35 @@ chat.get('/list', async (c) => {
 chat.post('/update/:chatId', async (c) => {
   const session = c.get('session')
   if (!session) {
-    return c.json({ error: '未授权的访问' }, 401)
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
   }
 
   const chatId = c.req.param('chatId')
   if (!chatId) {
-    return c.json({ error: '聊天会话ID不能为空' }, 400)
+    return c.json(
+      {
+        success: false,
+        error: '聊天会话ID不能为空',
+      },
+      400,
+    )
   }
 
   const { title, avatarUrl, description } = await c.req.json()
   if (!title) {
-    return c.json({ error: '标题不能为空' }, 400)
+    return c.json(
+      {
+        success: false,
+        error: '标题不能为空',
+      },
+      400,
+    )
   }
 
   try {
@@ -142,12 +240,30 @@ chat.post('/update/:chatId', async (c) => {
       .returning()
 
     if (updatedChat.length === 0) {
-      return c.json({ error: '聊天会话不存在或无权更新' }, 404)
+      return c.json(
+        {
+          success: false,
+          error: '聊天会话不存在或无权更新',
+        },
+        404,
+      )
     }
 
-    return c.json(updatedChat[0], 200)
+    return c.json(
+      {
+        success: true,
+        message: '聊天会话更新成功',
+      },
+      200,
+    )
   } catch (error) {
     console.error('更新聊天会话时出错:', error)
-    return c.json({ error: '更新聊天会话时出错' }, 500)
+    return c.json(
+      {
+        success: false,
+        error: '更新聊天会话时出错',
+      },
+      500,
+    )
   }
 })

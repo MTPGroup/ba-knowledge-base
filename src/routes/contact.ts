@@ -13,12 +13,24 @@ export const contact = new Hono<{
 contact.post('/add/:characterId', async (c) => {
   const session = c.get('session')
   if (!session) {
-    return c.json({ error: '未授权的访问' }, 401)
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
   }
 
   const characterId = c.req.param('characterId')
   if (!characterId) {
-    return c.json({ error: '角色ID不能为空' }, 400)
+    return c.json(
+      {
+        success: false,
+        error: '角色ID不能为空',
+      },
+      400,
+    )
   }
 
   try {
@@ -30,23 +42,47 @@ contact.post('/add/:characterId', async (c) => {
       })
       .returning()
 
-    return c.json(contact[0], 201)
+    return c.json(
+      {
+        success: true,
+        message: `联系人已添加: ${contact[0].characterId}`,
+      },
+      201,
+    )
   } catch (error) {
     console.error('添加联系人时出错', error)
-    return c.json({ error: '添加联系人时出错' }, 500)
+    return c.json(
+      {
+        success: false,
+        error: '添加联系人时出错',
+      },
+      500,
+    )
   }
 })
 
 // 删除AI角色联系人
-contact.delete('/remove/:characterId', async (c) => {
+contact.delete('/delete/:characterId', async (c) => {
   const session = c.get('session')
   if (!session) {
-    return c.json({ error: '未授权的访问' }, 401)
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
   }
 
   const characterId = c.req.param('characterId')
   if (!characterId) {
-    return c.json({ error: '角色ID不能为空' }, 400)
+    return c.json(
+      {
+        success: false,
+        error: '角色ID不能为空',
+      },
+      400,
+    )
   }
 
   try {
@@ -61,13 +97,31 @@ contact.delete('/remove/:characterId', async (c) => {
       .returning()
 
     if (result.length === 0) {
-      return c.json({ error: '联系人不存在或已被删除' }, 404)
+      return c.json(
+        {
+          success: false,
+          error: '联系人不存在或已被删除',
+        },
+        404,
+      )
     }
 
-    return c.json({ message: '联系人已删除' }, 200)
+    return c.json(
+      {
+        success: true,
+        message: '联系人已删除',
+      },
+      200,
+    )
   } catch (error) {
     console.error('删除联系人时出错', error)
-    return c.json({ error: '删除联系人时出错' }, 500)
+    return c.json(
+      {
+        success: false,
+        error: '删除联系人时出错',
+      },
+      500,
+    )
   }
 })
 
@@ -75,7 +129,13 @@ contact.delete('/remove/:characterId', async (c) => {
 contact.get('/list', async (c) => {
   const session = c.get('session')
   if (!session) {
-    return c.json({ error: '未授权的访问' }, 401)
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
   }
 
   try {
@@ -90,15 +150,36 @@ contact.get('/list', async (c) => {
       },
     })
     if (!userWithContacts) {
-      return c.json([], 200)
+      return c.json(
+        {
+          success: true,
+          data: {
+            contacts: [],
+          },
+        },
+        200,
+      )
     }
 
     return c.json(
-      userWithContacts.contacts.map((contact) => contact.character),
+      {
+        success: true,
+        data: {
+          contacts: userWithContacts.contacts.map(
+            (contact) => contact.character,
+          ),
+        },
+      },
       200,
     )
   } catch (error) {
     console.error('查询联系人时出错', error)
-    return c.json({ error: '查询联系人时出错' }, 500)
+    return c.json(
+      {
+        success: false,
+        error: '查询联系人时出错',
+      },
+      500,
+    )
   }
 })

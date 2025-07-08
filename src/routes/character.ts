@@ -13,18 +13,30 @@ export const character = new Hono<{
 character.post('/create', async (c) => {
   const session = c.get('session')
   if (!session) {
-    return c.json({ error: '未授权的访问' }, 401)
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
   }
 
   const { name, signature, avatarUrl, creatorId, persona, visibility } =
     await c.req.json()
 
   if (!name) {
-    return c.json({ error: '角色名称不能为空' }, 400)
+    return c.json(
+      {
+        success: false,
+        error: '角色名称不能为空',
+      },
+      400,
+    )
   }
 
   try {
-    const newCharacter = await db
+    await db
       .insert(ctr)
       .values({
         name,
@@ -36,10 +48,22 @@ character.post('/create', async (c) => {
       })
       .returning()
 
-    return c.json(newCharacter[0], 201)
+    return c.json(
+      {
+        success: true,
+        message: '角色创建成功',
+      },
+      201,
+    )
   } catch (error) {
     console.error('创建角色时出错:', error)
-    return c.json({ error: '创建角色时出错' }, 500)
+    return c.json(
+      {
+        success: false,
+        error: '创建角色时出错',
+      },
+      500,
+    )
   }
 })
 
@@ -47,7 +71,13 @@ character.post('/create', async (c) => {
 character.delete('/delete/:characterId', async (c) => {
   const session = c.get('session')
   if (!session) {
-    return c.json({ error: '未授权的访问' }, 401)
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
   }
 
   const characterId = c.req.param('characterId')
@@ -59,7 +89,13 @@ character.delete('/delete/:characterId', async (c) => {
     })
 
     if (!_character) {
-      return c.json({ error: '角色不存在或您没有权限删除此角色' }, 403)
+      return c.json(
+        {
+          success: false,
+          error: '角色不存在或您没有权限删除此角色',
+        },
+        403,
+      )
     }
 
     // 删除角色
@@ -69,13 +105,31 @@ character.delete('/delete/:characterId', async (c) => {
       .returning()
 
     if (deletedCharacter.length === 0) {
-      return c.json({ error: '角色不存在或已被删除' }, 404)
+      return c.json(
+        {
+          success: false,
+          error: '角色不存在或已被删除',
+        },
+        404,
+      )
     }
 
-    return c.json({ message: '角色已成功删除' }, 200)
+    return c.json(
+      {
+        success: true,
+        message: '角色已成功删除',
+      },
+      200,
+    )
   } catch (error) {
     console.error('删除角色时出错:', error)
-    return c.json({ error: '删除角色时出错' }, 500)
+    return c.json(
+      {
+        success: false,
+        error: '删除角色时出错',
+      },
+      500,
+    )
   }
 })
 
@@ -83,7 +137,13 @@ character.delete('/delete/:characterId', async (c) => {
 character.get('/list', async (c) => {
   const session = c.get('session')
   if (!session) {
-    return c.json({ error: '未授权的访问' }, 401)
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
   }
 
   try {
@@ -102,10 +162,24 @@ character.get('/list', async (c) => {
       },
     })
 
-    return c.json(characters, 200)
+    return c.json(
+      {
+        success: true,
+        data: {
+          characters,
+        },
+      },
+      200,
+    )
   } catch (error) {
     console.error('获取角色列表时出错:', error)
-    return c.json({ error: '获取角色列表时出错' }, 500)
+    return c.json(
+      {
+        success: false,
+        error: '获取角色列表时出错',
+      },
+      500,
+    )
   }
 })
 
@@ -113,13 +187,25 @@ character.get('/list', async (c) => {
 character.get('/detail/:characterId', async (c) => {
   const session = c.get('session')
   if (!session) {
-    return c.json({ error: '未授权的访问' }, 401)
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
   }
 
   const characterId = c.req.param('characterId')
 
   if (!characterId) {
-    return c.json({ error: '角色ID不能为空' }, 400)
+    return c.json(
+      {
+        success: false,
+        error: '角色ID不能为空',
+      },
+      400,
+    )
   }
 
   try {
@@ -138,20 +224,46 @@ character.get('/detail/:characterId', async (c) => {
     })
 
     if (!characterData) {
-      return c.json({ error: '角色不存在' }, 404)
+      return c.json(
+        {
+          success: false,
+          error: '角色不存在',
+        },
+        404,
+      )
     }
 
     if (
       characterData.visibility === 'private' &&
       characterData.creatorId !== session.user.id
     ) {
-      return c.json({ error: '您没有权限查看此角色' }, 403)
+      return c.json(
+        {
+          success: false,
+          error: '您没有权限查看此角色',
+        },
+        403,
+      )
     }
 
-    return c.json(characterData, 200)
+    return c.json(
+      {
+        success: true,
+        data: {
+          characterData,
+        },
+      },
+      200,
+    )
   } catch (error) {
     console.error('获取角色信息时出错:', error)
-    return c.json({ error: '获取角色信息时出错' }, 500)
+    return c.json(
+      {
+        success: false,
+        error: '获取角色信息时出错',
+      },
+      500,
+    )
   }
 })
 
@@ -159,14 +271,26 @@ character.get('/detail/:characterId', async (c) => {
 character.post('/update/:characterId', async (c) => {
   const session = c.get('session')
   if (!session) {
-    return c.json({ error: '未授权的访问' }, 401)
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
   }
 
   const characterId = c.req.param('characterId')
   const { name, signature, avatarUrl, persona, visibility } = await c.req.json()
 
   if (!characterId || !name) {
-    return c.json({ error: '角色ID和名称不能为空' }, 400)
+    return c.json(
+      {
+        success: false,
+        error: '角色ID和名称不能为空',
+      },
+      400,
+    )
   }
 
   try {
@@ -176,11 +300,17 @@ character.post('/update/:characterId', async (c) => {
     })
 
     if (!_character) {
-      return c.json({ error: '角色不存在或您没有权限更新此角色' }, 403)
+      return c.json(
+        {
+          success: false,
+          error: '角色不存在或您没有权限更新此角色',
+        },
+        403,
+      )
     }
 
     // 更新角色信息
-    const updatedCharacter = await db
+    await db
       .update(ctr)
       .set({
         name,
@@ -192,9 +322,21 @@ character.post('/update/:characterId', async (c) => {
       .where(eq(ctr.id, characterId))
       .returning()
 
-    return c.json(updatedCharacter[0], 200)
+    return c.json(
+      {
+        success: true,
+        message: '角色信息已成功更新',
+      },
+      200,
+    )
   } catch (error) {
     console.error('更新角色信息时出错:', error)
-    return c.json({ error: '更新角色信息时出错' }, 500)
+    return c.json(
+      {
+        success: false,
+        error: '更新角色信息时出错',
+      },
+      500,
+    )
   }
 })
