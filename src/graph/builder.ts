@@ -1,6 +1,6 @@
 import { Annotation, END, START, StateGraph } from '@langchain/langgraph'
 import { BaseMessage } from '@langchain/core/messages'
-import { generateNode, reflectNode, retrieveNode } from './node'
+import { generateNode, reflectNode, retrieveNode } from '@/graph/node'
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres'
 
 const agentState = Annotation.Root({

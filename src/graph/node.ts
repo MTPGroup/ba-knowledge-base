@@ -1,10 +1,7 @@
-import {
-  ChatPromptTemplate,
-  MessagesPlaceholder,
-} from '@langchain/core/prompts'
-import { embeddings, llm } from '../services/llm-service'
-import { milvusService } from '../services/milvus-service'
-import { AgentState } from './state'
+import { ChatPromptTemplate } from '@langchain/core/prompts'
+import { embeddings, llm } from '@/services/llm-service'
+import { milvusService } from '@/services/milvus-service'
+import { AgentState } from '@/graph/state'
 
 /// 节点: 检索知识
 export const retrieveNode = async (
@@ -30,7 +27,6 @@ export const reflectNode = async (
   state: AgentState,
 ): Promise<Partial<AgentState>> => {
   console.log('--- 节点: 反思问题 ---')
-  console.log('Current state:', JSON.stringify(state, null, 2))
   const { characterName, messages, context } = state
 
   const question = messages[messages.length - 1].content as string

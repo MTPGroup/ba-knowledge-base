@@ -6,6 +6,7 @@ import { RunnableConfig } from '@langchain/core/runnables'
 import { and, eq, lt, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { chat, message as tmsg } from '~/db'
+import { streamSSE } from 'hono/streaming'
 
 export const message = new Hono<{
   Variables: Variables
@@ -317,4 +318,157 @@ message.delete('/delete', async (c) => {
       500,
     )
   }
+})
+
+// ========== 流式生成支持 ==========
+
+message.post('/send-stream', async (c) => {
+  const session = c.get('session')
+  if (!session) {
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
+  }
+
+  const chatId = c.req.param('chatId') as string
+  const { message: msg } = await c.req.json()
+
+  if (!msg) {
+    return c.json(
+      {
+        success: false,
+        error: '消息不能为空',
+      },
+      400,
+    )
+  }
+
+  const chatMeta = await db.query.chat.findFirst({
+    where: eq(chat.id, chatId),
+    with: {
+      character: {
+        columns: {
+          name: true,
+        },
+      },
+    },
+  })
+
+  if (!chatMeta) {
+    return c.json(
+      {
+        success: false,
+        error: '聊天会话不存在',
+      },
+      404,
+    )
+  }
+
+  if (chatMeta.creatorId !== session.user.id) {
+    return c.json(
+      {
+        success: false,
+        error: '无权访问此聊天会话',
+      },
+      403,
+    )
+  }
+
+  // 插入用户消息到数据库
+  await db.insert(tmsg).values({
+    chatId,
+    role: 'user',
+    content: msg,
+  })
+  // 更新会话信息
+  await db
+    .update(chat)
+    .set({
+      lastMessage: msg.slice(0, 20),
+      updatedAt: new Date(),
+    })
+    .where(eq(chat.id, chatId))
+
+  return streamSSE(c, async (stream) => {
+    const config: RunnableConfig = {
+      configurable: {
+        thread_id: chatId,
+      },
+    }
+
+    let finalResponse = ''
+
+    try {
+      const streamResponse = characterGraph.streamEvents(
+        {
+          messages: [new HumanMessage(msg)],
+          characterName: chatMeta.character.name,
+        },
+        {
+          version: 'v2',
+          ...config,
+        },
+      )
+
+      for await (const chunk of streamResponse) {
+        console.log(`--- Stream Chunk ${chunk.name} ---\n`)
+        if (
+          chunk.metadata.langgraph_node === 'reflect' &&
+          chunk.data.chunk !== null &&
+          chunk.data.chunk !== undefined
+        ) {
+          const token = chunk.data.chunk
+          await stream.write(
+            JSON.stringify({
+              type: 'reflection_chunk',
+              content: token.content,
+            }),
+          )
+        } else if (
+          chunk.metadata.langgraph_node === 'generate' &&
+          chunk.data.chunk !== null &&
+          chunk.data.chunk !== undefined
+        ) {
+          console.log('--- 生成的响应内容 ---', chunk.data.chunk)
+          const token = chunk.data.chunk
+          finalResponse += token.content // 累积生成的响应内容
+          await stream.write(
+            JSON.stringify({ type: 'token', content: token.content }),
+          )
+        }
+      }
+    } catch (error) {
+      console.error('流式聊天处理错误:', error)
+      await stream.write(
+        JSON.stringify({
+          type: 'error',
+          content: '处理聊天时出错',
+        }),
+      )
+    }
+
+    if (finalResponse) {
+      // 插入AI回复
+      await db.insert(tmsg).values({
+        chatId,
+        role: 'ai',
+        content: finalResponse,
+      })
+      // 更新会话最后一条消息
+      await db
+        .update(chat)
+        .set({
+          lastMessage: finalResponse.slice(0, 20),
+          updatedAt: new Date(),
+        })
+        .where(eq(chat.id, chatId))
+    }
+
+    await stream.write(JSON.stringify({ type: 'final' }))
+    await stream.close()
+  })
 })

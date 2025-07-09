@@ -898,6 +898,13 @@
     zod "^3.25.32"
     zod-to-json-schema "^3.22.3"
 
+"@langchain/deepseek@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@langchain/deepseek/-/deepseek-0.0.2.tgz#ffd9dba8fb9b3413aa19ed0db889c2d37dc24de3"
+  integrity sha512-u13KbPUXW7uhcybbRzYdRroBgqVUSgG0SJM15c7Etld2yjRQC2c4O/ga9eQZdLh/kaDlQfH/ZITFdjHe77RnGw==
+  dependencies:
+    "@langchain/openai" "^0.5.5"
+
 "@langchain/google-genai@^0.2.14":
   version "0.2.14"
   resolved "https://registry.yarnpkg.com/@langchain/google-genai/-/google-genai-0.2.14.tgz#81be6f1575e6ea6b638013c872ca75ea528b2c4f"
@@ -940,7 +947,7 @@
     uuid "^10.0.0"
     zod "^3.25.32"
 
-"@langchain/openai@>=0.1.0 <0.6.0", "@langchain/openai@>=0.2.0 <0.6.0":
+"@langchain/openai@>=0.1.0 <0.6.0", "@langchain/openai@>=0.2.0 <0.6.0", "@langchain/openai@^0.5.5":
   version "0.5.18"
   resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.5.18.tgz#59ebbf48044d711ce9503d3b9854a3533cb54683"
   integrity sha512-CX1kOTbT5xVFNdtLjnM0GIYNf+P7oMSu+dGCFxxWRa3dZwWiuyuBXCm+dToUGxDLnsHuV1bKBtIzrY1mLq/A1Q==

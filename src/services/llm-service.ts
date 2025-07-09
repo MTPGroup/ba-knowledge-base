@@ -29,10 +29,17 @@ import { ChatAlibabaTongyi } from '@langchain/community/chat_models/alibaba_tong
 //   model: 'text-embedding-004',
 //   taskType: TaskType.SEMANTIC_SIMILARITY,
 // })
+//
+
+// export const llm = new ChatDeepSeek({
+//   model: 'deepseek-reasoner',
+//   temperature: 0.7,
+// })
 
 export const llm = new ChatAlibabaTongyi({
   model: 'qwen-plus-2025-04-28',
   temperature: 0.7,
+  streaming: true,
 })
 
 export const embeddings = new AlibabaTongyiEmbeddings({

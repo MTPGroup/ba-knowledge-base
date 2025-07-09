@@ -26,6 +26,7 @@
     "@hono/node-server": "^1.15.0",
     "@langchain/community": "^0.3.48",
     "@langchain/core": "^0.3.62",
+    "@langchain/deepseek": "^0.0.2",
     "@langchain/google-genai": "^0.2.14",
     "@langchain/langgraph": "^0.3.6",
     "@langchain/langgraph-checkpoint-postgres": "^0.0.5",

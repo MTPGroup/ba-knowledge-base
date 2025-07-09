@@ -7,8 +7,8 @@ import { cors } from 'hono/cors'
 import { auth } from '@/lib/auth'
 import { character } from '@/routes/character'
 import { betterAuth } from '@/middlewares/auth'
-import { contact } from './routes/contact'
-import { checkpointer } from './graph/builder'
+import { contact } from '@/routes/contact'
+import { checkpointer } from '@/graph/builder'
 
 const app = new Hono()
 
