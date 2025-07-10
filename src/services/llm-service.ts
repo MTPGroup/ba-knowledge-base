@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { AlibabaTongyiEmbeddings } from '@langchain/community/embeddings/alibaba_tongyi'
 import { ChatAlibabaTongyi } from '@langchain/community/chat_models/alibaba_tongyi'
 

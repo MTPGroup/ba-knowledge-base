@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc --outDir dist",
+    "build": "tsx esbuild.config.ts",
     "start": "node dist/index.js",
     "milvus:ingest": "ts-node scripts/ingest.ts",
     "auth:generate": "npx @better-auth/cli generate --config src/lib/auth.ts --output db/better-auth-schema.ts",
@@ -15,7 +15,7 @@
     "@types/node": "^20.11.17",
     "@types/pg": "^8.15.4",
     "drizzle-kit": "^0.31.4",
-    "esbuild": "^0.21.4",
+    "esbuild": "^0.25.6",
     "npm-run-all2": "^6.2.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",

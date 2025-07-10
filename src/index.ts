@@ -1,4 +1,4 @@
-import 'dotenv/config'
+import dotenv from 'dotenv'
 import { Hono } from 'hono'
 import { serve } from '@hono/node-server'
 import { chat } from '@/routes/chat'
@@ -9,6 +9,8 @@ import { character } from '@/routes/character'
 import { betterAuth } from '@/middlewares/auth'
 import { contact } from '@/routes/contact'
 import { checkpointer } from '@/graph/builder'
+
+dotenv.config()
 
 const app = new Hono()
 
