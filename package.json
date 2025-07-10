@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc --outDir dist",
     "start": "node dist/index.js",
     "milvus:ingest": "ts-node scripts/ingest.ts",
     "auth:generate": "npx @better-auth/cli generate --config src/lib/auth.ts --output db/better-auth-schema.ts",
