@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body,
+      table,
+      td,
+      a {
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+      }
+      table,
+      td {
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+      }
+      img {
+        -ms-interpolation-mode: bicubic;
+        border: 0;
+        height: auto;
+        line-height: 100%;
+        outline: none;
+        text-decoration: none;
+      }
+      body {
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        background-color: #f4f4f4;
+      }
+
+      .container {
+        font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        padding: 20px;
+      }
+      .header img {
+        /* Logo Placeholder */
+        max-width: 150px;
+      }
+      .content {
+        padding: 10px 30px 30px 30px;
+        line-height: 1.6;
+        color: #333333;
+      }
+      .content h2 {
+        font-size: 22px;
+        color: #333;
+      }
+      .otp-box {
+        display: inline-block;
+        background-color: #e9ecef;
+        color: #000;
+        padding: 15px 30px;
+        margin: 20px 0;
+        border-radius: 5px;
+        font-size: 32px;
+        font-weight: bold;
+        letter-spacing: 5px;
+      }
+      .footer {
+        background-color: #f4f4f4;
+        padding: 20px;
+        font-size: 12px;
+        color: #888888;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          src="https://cdn.picui.cn/vip/2025/07/11/68710820152fb.png"
+          alt="Logo"
+        />
+      </div>
+      <div class="content">
+        <p>{{greeting}}</p>
+        <h2>您的 {{reason}} 验证码是</h2>
+        <div class="otp-box">{{otp_code}}</div>
+        <p>此验证码将在10分钟后失效。请勿与任何人分享此验证码。</p>
+      </div>
+      <div class="footer">
+        <p>此邮件由 {{product_name}} 自动发送，请勿直接回复。</p>
+      </div>
+    </div>
+  </body>
+</html>
