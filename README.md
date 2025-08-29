@@ -66,7 +66,7 @@ yarn milvus:ingest
 ### 2. 创建/迁移数据库
 
 ```bash
-yarn pg:mirgate
+yarn pg:migrate
 ```
 
 ### 3. 启动应用程序
