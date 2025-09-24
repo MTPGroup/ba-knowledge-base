@@ -41,26 +41,6 @@ export const auth = betterAuth({
       })
     },
   },
-  emailVerification: {
-    sendOnSignUp: true,
-    autoSignInAfterVerification: true,
-    sendVerificationEmail: async ({ user, url }) => {
-      await emailService.sendEmail({
-        to: user.email,
-        subject: '请验证您的电子邮件地址',
-        templateId: ACTION_LINK_TEMPLATE_ID,
-        templateData: {
-          title: '验证您的电子邮件地址',
-          greeting: `欢迎加入 ${PRODUCT_NAME}！`,
-          main_text:
-            '为了完成注册，请点击下方的按钮来验证您的邮箱。我们期待您的加入！',
-          button_text: '立即验证邮箱',
-          action_url: url,
-          product_name: PRODUCT_NAME,
-        },
-      })
-    },
-  },
   plugins: [
     username(),
     bearer(),
