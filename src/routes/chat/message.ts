@@ -1,7 +1,7 @@
 import { characterGraph } from '@/graph/builder'
 import { Variables } from '@/lib/auth'
 import { db } from '@/lib/database'
-import { HumanMessage } from '@langchain/core/messages'
+import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { RunnableConfig } from '@langchain/core/runnables'
 import { and, eq, lt, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
@@ -91,9 +91,23 @@ message.post('/send', async (c) => {
   }
 
   try {
+    const historyMessages = await db.query.message.findMany({
+      where: eq(tmsg.chatId, chatId),
+      orderBy: (msg, { asc }) => asc(msg.createdAt),
+      limit: 20,
+    })
+
+    const langChainMessages = historyMessages.map((msg) =>
+      msg.role === 'user'
+        ? new HumanMessage(msg.content as string)
+        : new AIMessage(msg.content as string),
+    )
+
+    langChainMessages.push(new HumanMessage(msg))
+
     const finalState = await characterGraph.invoke(
       {
-        messages: [new HumanMessage(msg)],
+        messages: langChainMessages,
         characterName: chatMeta.character.name,
       },
       config,
@@ -204,13 +218,13 @@ message.get('/list', async (c) => {
     const sender =
       msg.role === 'user'
         ? {
-          name: session.user.name,
-          avatar: session.user.image,
-        }
+            name: session.user.name,
+            avatar: session.user.image,
+          }
         : {
-          name: chatMeta.character.name,
-          avatar: chatMeta.character.avatarUrl || '/default-avatar.png',
-        }
+            name: chatMeta.character.name,
+            avatar: chatMeta.character.avatarUrl || '/default-avatar.png',
+          }
     return {
       sender,
       ...msg,
@@ -403,9 +417,21 @@ message.post('/send-stream', async (c) => {
     let finalResponse = ''
 
     try {
+      const historyMessages = await db.query.message.findMany({
+        where: eq(tmsg.chatId, chatId),
+        orderBy: (msg, { asc }) => asc(msg.createdAt),
+        limit: 20,
+      })
+
+      const langChainMessages = historyMessages.map((msg) =>
+        msg.role === 'user'
+          ? new HumanMessage(msg.content as string)
+          : new AIMessage(msg.content as string),
+      )
+
       const streamResponse = characterGraph.streamEvents(
         {
-          messages: [new HumanMessage(msg)],
+          messages: langChainMessages,
           characterName: chatMeta.character.name,
         },
         {
