@@ -205,11 +205,14 @@ message.get('/list', async (c) => {
     )
   }
 
+  const whereConditions = [eq(tmsg.chatId, chatId)]
+
+  if (before) {
+    whereConditions.push(lt(tmsg.createdAt, new Date(before)))
+  }
+
   const messages = await db.query.message.findMany({
-    where: and(
-      eq(tmsg.chatId, chatId),
-      lt(tmsg.createdAt, before ? new Date(before) : new Date()),
-    ),
+    where: and(...whereConditions),
     orderBy: (msg, { desc }) => desc(msg.createdAt),
     limit,
   })
@@ -449,10 +452,10 @@ message.post('/send-stream', async (c) => {
         ) {
           const token = chunk.data.chunk
           await stream.write(
-            JSON.stringify({
+            `data: ${JSON.stringify({
               type: 'reflection_chunk',
               content: token.content,
-            }),
+            })}\n\n`,
           )
         } else if (
           chunk.metadata.langgraph_node === 'generate' &&
@@ -463,17 +466,20 @@ message.post('/send-stream', async (c) => {
           const token = chunk.data.chunk
           finalResponse += token.content // 累积生成的响应内容
           await stream.write(
-            JSON.stringify({ type: 'token', content: token.content }),
+            `data: ${JSON.stringify({
+              type: 'token',
+              content: token.content,
+            })}\n\n`,
           )
         }
       }
     } catch (error) {
       console.error('流式聊天处理错误:', error)
       await stream.write(
-        JSON.stringify({
+        `data: ${JSON.stringify({
           type: 'error',
           content: '处理聊天时出错',
-        }),
+        })}\n\n`,
       )
     }
 
@@ -494,7 +500,7 @@ message.post('/send-stream', async (c) => {
         .where(eq(chat.id, chatId))
     }
 
-    await stream.write(JSON.stringify({ type: 'final' }))
+    await stream.write(`data: ${JSON.stringify({ type: 'final' })}\n\n`)
     await stream.close()
   })
 })
