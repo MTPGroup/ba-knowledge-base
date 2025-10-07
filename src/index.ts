@@ -9,6 +9,7 @@ import { character } from '@/routes/character'
 import { betterAuth } from '@/middlewares/auth'
 import { contact } from '@/routes/contact'
 import { checkpointer } from '@/graph/builder'
+import { upload } from './routes/upload'
 
 dotenv.config()
 
@@ -37,6 +38,7 @@ app.get('/', (c) => {
 app.route('/api/chat', chat)
 app.route('/api/character', character)
 app.route('/api/contact', contact)
+app.route('/api/upload', upload)
 
 checkpointer.setup()
 
