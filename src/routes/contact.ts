@@ -1,8 +1,8 @@
 import { Variables } from '@/lib/auth'
 import { db } from '@/lib/database'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { user, userCharacterContacts } from '~/db'
+import { user, userCharacterContacts, chat, message } from '~/db'
 
 export const contact = new Hono<{
   Variables: Variables
@@ -86,35 +86,82 @@ contact.delete('/delete/:characterId', async (c) => {
   }
 
   try {
-    const result = await db
-      .delete(userCharacterContacts)
-      .where(
-        and(
-          eq(userCharacterContacts.userId, session.user.id),
-          eq(userCharacterContacts.characterId, characterId),
-        ),
-      )
-      .returning()
+    // 使用事务确保数据一致性
+    await db.transaction(async (tx) => {
+      // 1. 首先检查联系人是否存在
+      const contactResult = await tx
+        .delete(userCharacterContacts)
+        .where(
+          and(
+            eq(userCharacterContacts.userId, session.user.id),
+            eq(userCharacterContacts.characterId, characterId),
+          ),
+        )
+        .returning()
 
-    if (result.length === 0) {
+      if (contactResult.length === 0) {
+        throw new Error('联系人不存在或已被删除')
+      }
+
+      // 2. 查找该用户与该角色的所有会话
+      const userChats = await tx.query.chat.findMany({
+        where: and(
+          eq(chat.creatorId, session.user.id),
+          eq(chat.characterId, characterId),
+        ),
+        columns: {
+          id: true,
+        },
+      })
+
+      if (userChats.length > 0) {
+        // 3. 逐个删除会话和相关数据
+        for (const userChat of userChats) {
+          const chatId = userChat.id
+
+          // 删除该会话的所有消息
+          await tx.delete(message).where(eq(message.chatId, chatId))
+
+          // 清空checkpointer相关数据
+          await Promise.all([
+            tx.execute(
+              sql`DELETE FROM checkpoints WHERE thread_id = ${chatId}`,
+            ),
+            tx.execute(
+              sql`DELETE FROM checkpoint_writes WHERE thread_id = ${chatId}`,
+            ),
+            tx.execute(
+              sql`DELETE FROM checkpoint_blobs WHERE thread_id = ${chatId}`,
+            ),
+          ])
+
+          // 删除会话记录
+          await tx.delete(chat).where(eq(chat.id, chatId))
+        }
+      }
+    })
+
+    return c.json(
+      {
+        success: true,
+        message: '联系人及相关会话已删除',
+      },
+      200,
+    )
+  } catch (error: any) {
+    console.error('删除联系人时出错', error)
+
+    // 处理自定义错误
+    if (error.message === '联系人不存在或已被删除') {
       return c.json(
         {
           success: false,
-          error: '联系人不存在或已被删除',
+          error: error.message,
         },
         404,
       )
     }
 
-    return c.json(
-      {
-        success: true,
-        message: '联系人已删除',
-      },
-      200,
-    )
-  } catch (error) {
-    console.error('删除联系人时出错', error)
     return c.json(
       {
         success: false,

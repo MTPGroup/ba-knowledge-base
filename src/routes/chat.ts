@@ -37,6 +37,27 @@ chat.post('/create', async (c) => {
   }
 
   try {
+    const existingChat = await db.query.chat.findFirst({
+      where: and(
+        eq(ct.creatorId, session.user.id),
+        eq(ct.characterId, characterId),
+      ),
+    })
+
+    if (existingChat) {
+      return c.json(
+        {
+          success: false,
+          error: '聊天会话已存在',
+          data: {
+            existingChatId: existingChat.id,
+            existingChatTitle: existingChat.title,
+          },
+        },
+        409,
+      )
+    }
+
     await db
       .insert(ct)
       .values({
@@ -62,6 +83,68 @@ chat.post('/create', async (c) => {
       {
         success: false,
         error: '创建聊天会话时出错',
+      },
+      500,
+    )
+  }
+})
+
+// 获取聊天会话信息
+chat.get('/detail/:chatId', async (c) => {
+  const session = c.get('session')
+  if (!session) {
+    return c.json(
+      {
+        success: false,
+        error: '未授权的访问',
+      },
+      401,
+    )
+  }
+
+  const chatId = c.req.param('chatId')
+  if (!chatId) {
+    return c.json(
+      {
+        success: false,
+        error: '聊天会话ID不能为空',
+      },
+      400,
+    )
+  }
+
+  try {
+    // 同时传递对应会话中的ai
+    const chat = await db.query.chat.findFirst({
+      where: and(eq(ct.id, chatId), eq(ct.creatorId, session.user.id)),
+      with: {
+        character: true,
+      },
+    })
+
+    if (!chat) {
+      return c.json(
+        {
+          success: false,
+          error: '聊天会话不存在或无权访问',
+        },
+        404,
+      )
+    }
+
+    return c.json(
+      {
+        success: true,
+        data: chat,
+      },
+      200,
+    )
+  } catch (error) {
+    console.error('获取聊天会话信息时出错:', error)
+    return c.json(
+      {
+        success: false,
+        error: '获取聊天会话信息时出错',
       },
       500,
     )
