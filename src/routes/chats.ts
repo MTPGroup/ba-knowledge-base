@@ -8,7 +8,6 @@ import {
   SuccessResponseSchema,
   commonResponses,
 } from '@/lib/openapi'
-import { Variables } from '@/lib/auth'
 import { db } from '@/lib/database'
 import { chat as ct, user } from '~/db/index'
 import { and, eq, sql } from 'drizzle-orm'

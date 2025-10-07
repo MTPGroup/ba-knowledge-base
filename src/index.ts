@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 import { serve } from '@hono/node-server'
-// import { Scalar } from '@scalar/hono-api-reference'
-import { swaggerUI } from '@hono/swagger-ui'
+import { Scalar } from '@scalar/hono-api-reference'
+import { createMarkdownFromOpenApi } from '@scalar/openapi-to-markdown'
 import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
 import { auth } from '@/lib/auth'
@@ -61,13 +61,41 @@ app.get('/openapi.json', async (c) => {
   }
 })
 
-// app.get('/scalar', Scalar({ url: '/doc' }))
+app.get('llm.txt', async (c) => {
+  const content = app.getOpenAPI31Document({
+    openapi: '3.0.0',
+    info: openAPIInfo,
+    servers: servers,
+    tags: tags,
+  })
 
-// Swagger UI 页面
+  const markdown = await createMarkdownFromOpenApi(JSON.stringify(content))
+  return c.text(markdown)
+})
+
+// Scalar API Reference 页面
 app.get(
   '/docs',
-  swaggerUI({
-    url: '/openapi.json',
+  Scalar({
+    theme: 'purple',
+    layout: 'modern',
+    showSidebar: true,
+    // @ts-ignore
+    searchHotkey: 'k',
+    hideDownloadButton: false,
+    hideTestRequestButton: false,
+    isEditable: false,
+    metaData: {
+      title: 'AI 角色聊天系统 API 文档',
+      description: '基于 HonoJS 和 Better Auth 构建的 AI 角色聊天系统 API 文档',
+      ogDescription: '探索我们强大的 AI 角色聊天 API',
+      ogTitle: 'AI 角色聊天系统 API',
+      twitterCard: 'summary_large_image',
+    },
+    sources: [
+      { url: '/openapi.json', title: 'Main' },
+      { url: '/api/auth/open-api/generate-schema', title: 'Auth' },
+    ],
   }),
 )
 
@@ -78,12 +106,13 @@ app.get('/', (c) => {
     version: '1.0.0',
     docs: '/docs',
     openapi: '/openapi.json',
+    documentation: 'Powered by Scalar API Reference',
     endpoints: [
-      '/api/auth/*',
-      '/api/character',
-      '/api/chat',
-      '/api/contact',
-      '/api/upload',
+      '/api/v1/auth/*',
+      '/api/v1/character',
+      '/api/v1/chat',
+      '/api/v1/contact',
+      '/api/v1/upload',
     ],
   })
 })

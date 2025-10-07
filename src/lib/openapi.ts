@@ -247,8 +247,8 @@ export const openAPIInfo = {
     email: 'hanasakayui2022@gmail.com',
   },
   license: {
-    name: 'MIT',
-    url: 'https://opensource.org/licenses/MIT',
+    name: 'GNU General Public License v3.0',
+    url: 'https://opensource.org/licenses/GPL-3.0',
   },
 }
 

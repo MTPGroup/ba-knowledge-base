@@ -9,6 +9,7 @@
 - **向量数据库:** 角色知识使用 Milvus 向量数据库进行存储和检索，从而能够高效地进行相似性搜索以获取相关信息。
 - **LangGraph 框架:** 对话流程由使用 LangGraph 构建的状态机管理，允许进行复杂和动态的交互。
 - **由通义提供支持:** 该应用程序利用Gemini模型进行自然语言理解和生成。
+- **现代化 API 文档:** 集成了 Scalar API Reference，提供美观、交互式的 API 文档界面。
 
 ## 安装
 
@@ -78,6 +79,15 @@ yarn dev
 ```
 
 默认情况下，服务器将在 `http://localhost:3001` 上启动。
+
+### 4. 访问 API 文档
+
+应用程序提供了现代化的 API 文档界面，由 Scalar API Reference 提供支持：
+
+- **API 文档界面**: `http://localhost:3001/docs`
+- **OpenAPI JSON**: `http://localhost:3001/openapi.json`
+
+API 文档包含所有可用的端点、请求/响应格式、认证方式等详细信息，支持直接在浏览器中测试 API。
 
 ## 贡献
 
