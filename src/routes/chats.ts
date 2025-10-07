@@ -17,7 +17,7 @@ export const chatOpenAPI = createOpenAPIApp()
 // 创建聊天会话路由
 const createChatRoute = createAuthenticatedRoute({
   method: 'post',
-  path: '/api/chat/create',
+  path: '/api/chats',
   tags: ['Chats'],
   summary: '创建聊天会话',
   description: '为指定 AI 角色创建新的聊天会话',
@@ -143,110 +143,10 @@ chatOpenAPI.openapi(createChatRoute, async (c) => {
   }
 })
 
-// 获取聊天会话详情路由
-const getChatDetailRoute = createAuthenticatedRoute({
-  method: 'get',
-  path: '/api/chat/detail/{chatId}',
-  tags: ['Chats'],
-  summary: '获取聊天会话详情',
-  description: '获取指定聊天会话的详细信息，包含关联的 AI 角色信息',
-  request: {
-    params: z.object({
-      chatId: z.string().min(1, '聊天会话ID不能为空'),
-    }),
-  },
-  responses: {
-    200: {
-      description: '成功获取聊天会话详情',
-      content: {
-        'application/json': {
-          schema: SuccessResponseSchema(ChatSchema),
-        },
-      },
-    },
-    ...commonResponses,
-  },
-})
-
-chatOpenAPI.openapi(getChatDetailRoute, async (c) => {
-  const session = c.get('session')
-  if (!session) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          message: '未授权的访问',
-          code: 'UNAUTHORIZED',
-        },
-        timestamp: new Date().toISOString(),
-      },
-      401,
-    )
-  }
-
-  const id = c.req.param('id')
-  if (!id) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          message: '聊天会话ID不能为空',
-          code: 'BAD_REQUEST',
-        },
-        timestamp: new Date().toISOString(),
-      },
-      400,
-    )
-  }
-
-  try {
-    const chat = await db.query.chat.findFirst({
-      where: and(eq(ct.id, id), eq(ct.creatorId, session.user.id)),
-      with: {
-        character: true,
-      },
-    })
-
-    if (!chat) {
-      return c.json(
-        {
-          success: false,
-          error: {
-            message: '聊天会话不存在或无权访问',
-            code: 'NOT_FOUND',
-          },
-          timestamp: new Date().toISOString(),
-        },
-        404,
-      )
-    }
-
-    return c.json({
-      success: true,
-      message: '获取聊天会话详情成功',
-      data: chat,
-      timestamp: new Date().toISOString(),
-    })
-  } catch (error) {
-    console.error('获取聊天会话信息时出错:', error)
-    return c.json(
-      {
-        success: false,
-        error: {
-          message: '获取聊天会话信息时出错',
-          code: 'INTERNAL_SERVER_ERROR',
-        },
-        timestamp: new Date().toISOString(),
-      },
-      500,
-    )
-  }
-})
-
 // 获取聊天会话列表路由
 const getChatListRoute = createAuthenticatedRoute({
   method: 'get',
-  path: '/api/chat/list',
+  path: '/api/chats',
   tags: ['Chats'],
   summary: '获取聊天会话列表',
   description: '获取当前用户的所有聊天会话列表',
@@ -322,10 +222,110 @@ chatOpenAPI.openapi(getChatListRoute, async (c) => {
   }
 })
 
+// 获取聊天会话详情路由
+const getChatDetailRoute = createAuthenticatedRoute({
+  method: 'get',
+  path: '/api/chats/{chatId}',
+  tags: ['Chats'],
+  summary: '获取聊天会话详情',
+  description: '获取指定聊天会话的详细信息，包含关联的 AI 角色信息',
+  request: {
+    params: z.object({
+      chatId: z.string().min(1, '聊天会话ID不能为空'),
+    }),
+  },
+  responses: {
+    200: {
+      description: '成功获取聊天会话详情',
+      content: {
+        'application/json': {
+          schema: SuccessResponseSchema(ChatSchema),
+        },
+      },
+    },
+    ...commonResponses,
+  },
+})
+
+chatOpenAPI.openapi(getChatDetailRoute, async (c) => {
+  const session = c.get('session')
+  if (!session) {
+    return c.json(
+      {
+        success: false,
+        error: {
+          message: '未授权的访问',
+          code: 'UNAUTHORIZED',
+        },
+        timestamp: new Date().toISOString(),
+      },
+      401,
+    )
+  }
+
+  const chatId = c.req.param('chatId')
+  if (!chatId) {
+    return c.json(
+      {
+        success: false,
+        error: {
+          message: '聊天会话ID不能为空',
+          code: 'BAD_REQUEST',
+        },
+        timestamp: new Date().toISOString(),
+      },
+      400,
+    )
+  }
+
+  try {
+    const chat = await db.query.chat.findFirst({
+      where: and(eq(ct.id, chatId), eq(ct.creatorId, session.user.id)),
+      with: {
+        character: true,
+      },
+    })
+
+    if (!chat) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            message: '聊天会话不存在或无权访问',
+            code: 'NOT_FOUND',
+          },
+          timestamp: new Date().toISOString(),
+        },
+        404,
+      )
+    }
+
+    return c.json({
+      success: true,
+      message: '获取聊天会话详情成功',
+      data: chat,
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error) {
+    console.error('获取聊天会话信息时出错:', error)
+    return c.json(
+      {
+        success: false,
+        error: {
+          message: '获取聊天会话信息时出错',
+          code: 'INTERNAL_SERVER_ERROR',
+        },
+        timestamp: new Date().toISOString(),
+      },
+      500,
+    )
+  }
+})
+
 // 更新聊天会话路由
 const updateChatRoute = createAuthenticatedRoute({
-  method: 'post',
-  path: '/api/chat/update/{chatId}',
+  method: 'put',
+  path: '/api/chats/{chatId}',
   tags: ['Chats'],
   summary: '更新聊天会话信息',
   description: '更新聊天会话的标题、头像和描述信息',
@@ -375,8 +375,8 @@ chatOpenAPI.openapi(updateChatRoute, async (c) => {
     )
   }
 
-  const id = c.req.param('id')
-  if (!id) {
+  const chatId = c.req.param('chatId')
+  if (!chatId) {
     return c.json(
       {
         success: false,
@@ -402,7 +402,7 @@ chatOpenAPI.openapi(updateChatRoute, async (c) => {
         description,
         updatedAt: new Date(),
       })
-      .where(and(eq(ct.id, id), eq(ct.creatorId, session.user.id)))
+      .where(and(eq(ct.id, chatId), eq(ct.creatorId, session.user.id)))
       .returning()
 
     if (updatedChat.length === 0) {
@@ -444,7 +444,7 @@ chatOpenAPI.openapi(updateChatRoute, async (c) => {
 // 删除聊天会话路由
 const deleteChatRoute = createAuthenticatedRoute({
   method: 'delete',
-  path: '/api/chat/delete/{chatId}',
+  path: '/api/chats/{chatId}',
   tags: ['Chats'],
   summary: '删除聊天会话',
   description: '删除指定的聊天会话及其所有消息和检查点数据',
@@ -486,8 +486,8 @@ chatOpenAPI.openapi(deleteChatRoute, async (c) => {
     )
   }
 
-  const id = c.req.param('id')
-  if (!id) {
+  const chatId = c.req.param('chatId')
+  if (!chatId) {
     return c.json(
       {
         success: false,
@@ -504,7 +504,7 @@ chatOpenAPI.openapi(deleteChatRoute, async (c) => {
   try {
     const result = await db
       .delete(ct)
-      .where(and(eq(ct.id, id), eq(ct.creatorId, session.user.id)))
+      .where(and(eq(ct.id, chatId), eq(ct.creatorId, session.user.id)))
 
     if (result.rowCount === 0) {
       return c.json(
@@ -523,9 +523,13 @@ chatOpenAPI.openapi(deleteChatRoute, async (c) => {
     // 清空checkpointer
     await db.transaction(async (tx) => {
       await Promise.all([
-        tx.execute(sql`DELETE FROM checkpoints WHERE thread_id = ${id}`),
-        tx.execute(sql`DELETE FROM checkpoint_writes WHERE thread_id = ${id}`),
-        tx.execute(sql`DELETE FROM checkpoint_blobs WHERE thread_id = ${id}`),
+        tx.execute(sql`DELETE FROM checkpoints WHERE thread_id = ${chatId}`),
+        tx.execute(
+          sql`DELETE FROM checkpoint_writes WHERE thread_id = ${chatId}`,
+        ),
+        tx.execute(
+          sql`DELETE FROM checkpoint_blobs WHERE thread_id = ${chatId}`,
+        ),
       ])
     })
 

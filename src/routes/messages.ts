@@ -8,7 +8,6 @@ import {
   SuccessResponseSchema,
   commonResponses,
 } from '@/lib/openapi'
-import { Variables } from '@/lib/auth'
 import { db } from '@/lib/database'
 import { chat, message as tmsg } from '~/db'
 import { and, eq, lt, sql } from 'drizzle-orm'
@@ -22,7 +21,7 @@ export const messageOpenAPI = createOpenAPIApp()
 // 发送消息路由
 const sendMessageRoute = createAuthenticatedRoute({
   method: 'post',
-  path: '/api/chat/{chatId}/message/send',
+  path: '/api/chats/{chatId}/messages',
   tags: ['Messages'],
   summary: '发送消息',
   description: '向指定聊天会话发送消息并获取 AI 回复',
@@ -217,7 +216,7 @@ messageOpenAPI.openapi(sendMessageRoute, async (c) => {
 // 流式发送消息路由
 const sendStreamMessageRoute = createAuthenticatedRoute({
   method: 'post',
-  path: '/api/chat/{chatId}/message/send-stream',
+  path: '/api/chats/{chatId}/messages/stream',
   tags: ['Messages'],
   summary: '流式发送消息',
   description: '向指定聊天会话发送消息并以流式方式接收 AI 回复',
@@ -433,7 +432,7 @@ messageOpenAPI.openapi(sendStreamMessageRoute, async (c) => {
 // 获取消息列表路由
 const getMessageListRoute = createAuthenticatedRoute({
   method: 'get',
-  path: '/api/chat/{chatId}/message/list',
+  path: '/api/chats/{chatId}/messages',
   tags: ['Messages'],
   summary: '获取消息列表',
   description: '获取指定聊天会话的消息历史，支持分页加载',
@@ -575,7 +574,7 @@ messageOpenAPI.openapi(getMessageListRoute, async (c) => {
 // 清空消息路由
 const deleteMessagesRoute = createAuthenticatedRoute({
   method: 'delete',
-  path: '/api/chat/{chatId}/message/delete',
+  path: '/api/chats/{chatId}/messages',
   tags: ['Messages'],
   summary: '清空聊天消息',
   description: '清空指定聊天会话的所有消息和检查点数据',

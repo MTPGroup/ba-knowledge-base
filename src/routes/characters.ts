@@ -19,7 +19,7 @@ export const charactersOpenAPI = createOpenAPIApp()
 // 获取角色列表路由
 const getCharactersRoute = createAuthenticatedRoute({
   method: 'get',
-  path: '/api/character',
+  path: '/api/characters',
   tags: ['Characters'],
   summary: '获取角色列表',
   description: '获取 AI 角色列表，支持分页、搜索和可见性过滤',
@@ -157,7 +157,7 @@ charactersOpenAPI.openapi(getCharactersRoute, async (c) => {
 // 创建角色路由
 const createCharacterRoute = createAuthenticatedRoute({
   method: 'post',
-  path: '/api/character',
+  path: '/api/characters',
   tags: ['Characters'],
   summary: '创建 AI 角色',
   description: '创建新的 AI 聊天角色',
@@ -240,7 +240,7 @@ charactersOpenAPI.openapi(createCharacterRoute, async (c) => {
 // 获取角色详情路由
 const getCharacterRoute = createAuthenticatedRoute({
   method: 'get',
-  path: '/api/character/{id}',
+  path: '/api/characters/{id}',
   tags: ['Characters'],
   summary: '获取角色详情',
   description: '根据 ID 获取特定角色的详细信息',
@@ -364,7 +364,7 @@ charactersOpenAPI.openapi(getCharacterRoute, async (c) => {
 // 完整更新角色路由
 const updateCharacterRoute = createAuthenticatedRoute({
   method: 'put',
-  path: '/api/character/{id}',
+  path: '/api/characters/{id}',
   tags: ['Characters'],
   summary: '更新角色信息（完整更新）',
   description: '完整更新角色的所有信息',
@@ -482,7 +482,7 @@ charactersOpenAPI.openapi(updateCharacterRoute, async (c) => {
 // 部分更新角色路由
 const patchCharacterRoute = createAuthenticatedRoute({
   method: 'patch',
-  path: '/api/character/{id}',
+  path: '/api/characters/{id}',
   tags: ['Characters'],
   summary: '更新角色信息（部分更新）',
   description: '部分更新角色信息，只更新提供的字段',
@@ -615,7 +615,7 @@ charactersOpenAPI.openapi(patchCharacterRoute, async (c) => {
 // 删除角色路由
 const deleteCharacterRoute = createAuthenticatedRoute({
   method: 'delete',
-  path: '/api/character/{id}',
+  path: '/api/characters/{id}',
   tags: ['Characters'],
   summary: '删除角色',
   description: '删除指定的 AI 角色（仅创建者可删除）',

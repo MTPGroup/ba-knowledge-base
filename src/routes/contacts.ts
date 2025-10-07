@@ -16,7 +16,7 @@ export const contactOpenAPI = createOpenAPIApp()
 // 获取联系人列表路由
 const getContactListRoute = createAuthenticatedRoute({
   method: 'get',
-  path: '/api/contact/list',
+  path: '/api/contacts',
   tags: ['Contacts'],
   summary: '获取联系人列表',
   description: '获取当前用户已添加的所有 AI 角色联系人列表',
@@ -101,7 +101,7 @@ contactOpenAPI.openapi(getContactListRoute, async (c) => {
 // 添加联系人路由
 const addContactRoute = createAuthenticatedRoute({
   method: 'post',
-  path: '/api/contact/add/{characterId}',
+  path: '/api/contacts/{characterId}',
   tags: ['Contacts'],
   summary: '添加 AI 角色联系人',
   description: '将指定的 AI 角色添加到用户的联系人列表中',
@@ -234,7 +234,7 @@ contactOpenAPI.openapi(addContactRoute, async (c) => {
 // 删除联系人路由
 const deleteContactRoute = createAuthenticatedRoute({
   method: 'delete',
-  path: '/api/contact/delete/{characterId}',
+  path: '/api/contacts/{characterId}',
   tags: ['Contacts'],
   summary: '删除 AI 角色联系人',
   description:

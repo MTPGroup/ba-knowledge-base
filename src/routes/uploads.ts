@@ -18,7 +18,7 @@ export const uploadOpenAPI = createOpenAPIApp()
 // 单张图片上传路由
 const uploadImageRoute = createRoute({
   method: 'post',
-  path: '/api/upload/image',
+  path: '/api/uploads/images',
   tags: ['Upload'],
   summary: '上传图片',
   description: '上传单张图片到腾讯云 COS 存储',
@@ -194,7 +194,7 @@ uploadOpenAPI.openapi(uploadImageRoute, async (c: any) => {
 // 批量图片上传路由
 const uploadImagesRoute = createRoute({
   method: 'post',
-  path: '/api/upload/images',
+  path: '/api/uploads/images/batch',
   tags: ['Upload'],
   summary: '批量上传图片',
   description: '批量上传图片文件，最多支持 10 张图片同时上传',
@@ -382,7 +382,7 @@ uploadOpenAPI.openapi(uploadImagesRoute, async (c: any) => {
 // 获取支持的路径类型路由
 const getPathTypesRoute = createRoute({
   method: 'get',
-  path: '/api/upload/path-types',
+  path: '/api/uploads/path-types',
   tags: ['Upload'],
   summary: '获取支持的路径类型',
   description: '获取文件上传支持的所有路径类型及其说明',

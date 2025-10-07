@@ -77,7 +77,7 @@ app.get('llm.txt', async (c) => {
 app.get(
   '/docs',
   Scalar({
-    theme: 'purple',
+    theme: 'elysiajs',
     layout: 'modern',
     showSidebar: true,
     // @ts-ignore
