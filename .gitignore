@@ -33,3 +33,6 @@ lerna-debug.log*
 
 volumes
 tests
+
+# generated docs
+docs/generated/

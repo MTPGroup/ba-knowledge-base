@@ -5,11 +5,11 @@ import { chat } from '@/routes/chat'
 import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
 import { auth } from '@/lib/auth'
-import { character } from '@/routes/character'
+import { characters } from '@/routes/character'
 import { betterAuth } from '@/middlewares/auth'
 import { contact } from '@/routes/contact'
+import { upload } from '@/routes/upload'
 import { checkpointer } from '@/graph/builder'
-import { upload } from './routes/upload'
 
 dotenv.config()
 
@@ -21,7 +21,7 @@ app.use(
   cors({
     origin: ['http://localhost:3001', 'https://api.shirabe.cn'],
     allowHeaders: ['Content-Type', 'Authorization'],
-    allowMethods: ['GET', 'POST'],
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     exposeHeaders: ['Content-Length'],
     maxAge: 600,
     credentials: true,
@@ -36,7 +36,7 @@ app.get('/', (c) => {
 })
 
 app.route('/api/chat', chat)
-app.route('/api/character', character)
+app.route('/api/character', characters)
 app.route('/api/contact', contact)
 app.route('/api/upload', upload)
 

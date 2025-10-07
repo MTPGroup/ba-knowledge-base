@@ -22,16 +22,16 @@ export const character = pgTable('character', {
     .references(() => user.id, { onDelete: 'cascade' }),
   // 角色名称
   name: text('name').notNull(),
-  // 角色签名
-  signature: text('signature').notNull(),
-  // 角色核心设定/性格描述
-  persona: text('persona').notNull(),
-  // 角色头像URL
-  avatarUrl: text('avatar_url').notNull(),
-  // 可见性: 公开或私有
-  visibility: varchar('visibility', { enum: ['public', 'private'] })
-    .default('private')
-    .notNull(),
+  // 角色签名（可选）
+  signature: text('signature'),
+  // 角色核心设定/性格描述（可选）
+  persona: text('persona'),
+  // 角色头像URL（可选）
+  avatarUrl: text('avatar_url'),
+  // 可见性: 公开或私有）
+  visibility: varchar('visibility', { enum: ['public', 'private'] }).default(
+    'private',
+  ),
   ...timestamps,
 })
 
@@ -50,12 +50,12 @@ export const chat = pgTable('chat', {
     .references(() => character.id, { onDelete: 'cascade' }),
   // 会话标题
   title: text('title').notNull(),
-  // 会话描述
-  description: text('description').notNull(),
-  // 会话头像URL
-  avatarUrl: text('avatar_url').notNull(),
-  // 最后一条消息的文本表示
-  lastMessage: text('last_message').notNull(),
+  // 会话描述（可选）
+  description: text('description'),
+  // 会话头像URL（可选）
+  avatarUrl: text('avatar_url'),
+  // 最后一条消息的文本表示（可选，默认为空）
+  lastMessage: text('last_message').default(''),
   ...timestamps,
 })
 
