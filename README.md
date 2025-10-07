@@ -124,4 +124,5 @@ API 文档包含所有可用的端点、请求/响应格式、认证方式等详
 ## 联系方式
 
 - 作者：hanasaki
-- 邮箱：hanasakayui2022@gmail.com
+- 邮箱：[hanasakayui2022@gmail.com](mailto://hanasakayui2022@gmail.com)
+- 交流群: [1057718717](https://qm.qq.com/q/VHpRTUdpO8)
