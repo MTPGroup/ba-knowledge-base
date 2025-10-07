@@ -12,7 +12,7 @@ export const createOpenAPIApp = () => {
             error: {
               message: '请求参数验证失败',
               code: 'VALIDATION_ERROR',
-              details: result.error.flatten(),
+              details: z.treeifyError(result.error),
             },
             timestamp: new Date().toISOString(),
           },
@@ -66,9 +66,9 @@ export const PaginationResponseSchema = <T extends z.ZodTypeAny>(
 export const UserSchema = z.object({
   id: z.string().describe('用户唯一标识'),
   name: z.string().describe('用户姓名'),
-  email: z.string().email().describe('用户邮箱'),
+  email: z.email().describe('用户邮箱'),
   username: z.string().optional().describe('用户名'),
-  image: z.string().url().optional().describe('用户头像URL'),
+  image: z.url().optional().describe('用户头像URL'),
   createdAt: z.string().describe('创建时间'),
   updatedAt: z.string().describe('更新时间'),
 })
