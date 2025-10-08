@@ -36,3 +36,6 @@ tests
 
 # generated docs
 docs/generated/
+
+# drizzle
+drizzle/meta/_journal.json
