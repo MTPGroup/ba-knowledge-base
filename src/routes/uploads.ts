@@ -27,7 +27,10 @@ const uploadImageRoute = createRoute({
       content: {
         'multipart/form-data': {
           schema: z.object({
-            image: z.any().describe('图片文件 (必需)'),
+            image: z
+              .any()
+              .openapi({ type: 'string', format: 'binary' })
+              .describe('图片文件 (必需)'),
             path: z
               .string()
               .optional()
@@ -161,11 +164,15 @@ uploadOpenAPI.openapi(uploadImageRoute, async (c: any) => {
       userId,
     )
 
+    // 检测是否配置自定义域名
+    const domain = process.env.TENCENT_COS_DOMAIN
+    const url = domain ? `${domain}/${result.key}` : result.url
+
     return c.json({
       success: true as const,
       message: '图片上传成功',
       data: {
-        url: result.url,
+        url: url,
         key: result.key,
         originalName: file.name,
         size: file.size,
@@ -204,7 +211,10 @@ const uploadImagesRoute = createRoute({
         'multipart/form-data': {
           schema: z.object({
             images: z
-              .union([z.any(), z.array(z.any())])
+              .union([
+                z.any().openapi({ type: 'string', format: 'binary' }),
+                z.array(z.any().openapi({ type: 'string', format: 'binary' })),
+              ])
               .describe('图片文件数组 (必需)'),
             path: z
               .string()
@@ -305,6 +315,9 @@ uploadOpenAPI.openapi(uploadImagesRoute, async (c: any) => {
     const results = []
     const errors = []
 
+    // 检测是否配置自定义域名
+    const domain = process.env.TENCENT_COS_DOMAIN
+
     for (const file of fileList) {
       try {
         // 验证文件类型和大小
@@ -335,8 +348,10 @@ uploadOpenAPI.openapi(uploadImagesRoute, async (c: any) => {
           userId,
         )
 
+        const url = domain ? `${domain}/${result.key}` : result.url
+
         results.push({
-          url: result.url,
+          url: url,
           key: result.key,
           originalName: file.name,
           size: file.size,

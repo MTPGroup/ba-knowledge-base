@@ -2,6 +2,7 @@ import {
   jsonb,
   pgTable,
   primaryKey,
+  boolean,
   text,
   timestamp,
   uuid,
@@ -10,6 +11,7 @@ import {
 import { account, session, user } from './better-auth-schema'
 import { relations, sql } from 'drizzle-orm'
 import { timestamps } from './column-helpers'
+import { ViewBuilder } from 'drizzle-orm/sqlite-core'
 
 // AI 角色表
 export const character = pgTable('character', {
@@ -156,3 +158,25 @@ export const messagesRelation = relations(message, ({ one }) => ({
     references: [chat.id],
   }), // 一条消息属于一次聊天
 }))
+
+// 用户设置
+export const userSettings = pgTable('user_settings', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }), // 与用户表建立外键关系，并级联删除
+  theme: text('theme', { enum: ['light', 'dark', 'system'] })
+    .default('system')
+    .notNull(),
+  language: text('language', { enum: ['zh-CN', 'en-US'] })
+    .default('zh-CN')
+    .notNull(),
+  notificationsEnabled: boolean('notifications_enabled')
+    .default(true)
+    .notNull(),
+  soundEnabled: boolean('sound_enabled').default(true).notNull(),
+  vibrationEnabled: boolean('vibration_enabled').default(true).notNull(),
+  chatBackgroundUrl: text('chat_background_url'),
+  contactBackgroundUrl: text('contact_background_url'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})

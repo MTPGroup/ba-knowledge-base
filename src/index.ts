@@ -13,6 +13,7 @@ import { chatOpenAPI } from '@/routes/chats'
 import { uploadOpenAPI } from '@/routes/uploads'
 import { messageOpenAPI } from '@/routes/messages'
 import { contactOpenAPI } from '@/routes/contacts'
+import { settingsOpenAPI } from '@/routes/settings'
 
 dotenv.config()
 
@@ -123,6 +124,7 @@ app.route('/', chatOpenAPI)
 app.route('/', uploadOpenAPI)
 app.route('/', messageOpenAPI)
 app.route('/', contactOpenAPI)
+app.route('/', settingsOpenAPI)
 
 checkpointer.setup()
 serve({

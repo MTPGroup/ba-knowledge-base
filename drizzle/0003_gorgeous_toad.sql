@@ -1,0 +1,1 @@
+ALTER TABLE "user_settings" ADD COLUMN "contact_background_url" text;
