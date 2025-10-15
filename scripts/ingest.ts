@@ -151,8 +151,8 @@ async function createCollectionIfNotExists(client: MilvusClient) {
   if (collections.data.some((c) => c.name === COLLECTION_NAME)) {
     console.log(`Collection "${COLLECTION_NAME}" 已存在，跳过创建。`)
     // 在开发中，先删除旧的 collection
-    await client.dropCollection({ collection_name: COLLECTION_NAME })
-    console.log('旧 Collection 已删除。')
+    // await client.dropCollection({ collection_name: COLLECTION_NAME })
+    // console.log('旧 Collection 已删除。')
     // return
   }
 
